@@ -34,9 +34,9 @@ const checkForm = () => {
 		amountInput.value !== "" &&
 		categorySelect.value !== "none"
 	) {
-		console.log("ok")
+		createNewTransaction()
 	} else {
-		alert("Complete all fields!")
+		alert("Wypełnij wszystkie pola!")
 	}
 }
 
@@ -50,16 +50,68 @@ const createNewTransaction = () => {
 	const newTransaction = document.createElement("div")
 	newTransaction.classList.add("transaction")
 	newTransaction.setAttribute("id", ID)
+	checkCategory(selectedCategory)
+
 	newTransaction.innerHTML = `
-    <p class="transaction-name">${categoryIcon} ${nameInput.value}</p>
-    <p class="transaction-amount">${amountInput.value}e 
-    <button class="delete" occlick="deleteTransaction(${ID})"><i class="fas fa-times"></i></button>
-    </p>
+        <p class="transaction-name">
+        ${categoryIcon} ${nameInput.value}
+        </p>
+        <p class="transaction-amount">
+        ${amountInput.value}€ 
+        <button class="delete" onclick="deleteTransatcion(${ID})"><i class="fas fa-times"></i></button>
+        </p>
     `
 	amountInput.value > 0
 		? incomeSection.appendChild(newTransaction) &&
 		  newTransaction.classList.add("income")
-		: expensesSection.appendChild(newTransaction) && newTransaction.classList.add("expense")
+		: expensesSection.appendChild(newTransaction) &&
+		  newTransaction.classList.add("expense")
+	moneyArr.push(parseFloat(amountInput.value))
+	countMoney(moneyArr)
+	closePanel()
+	ID++
+	clearInputs()
+}
+
+const selectCategory = () => {
+	selectedCategory = categorySelect.options[categorySelect.selectedIndex].text
+}
+
+const checkCategory = transaction => {
+	switch (transaction) {
+		case "[ + ] Income":
+			categoryIcon = '<i class="fas fa-money-bill-wave"></i>'
+			break
+		case "[ - ] Shopping":
+			categoryIcon = '<i class="fas fa-cart-arrow-down"></i>'
+			break
+		case "[ - ] Food":
+			categoryIcon = '<i class="fas fa-hamburger"></i>'
+			break
+		case "[ - ] Cinema":
+			categoryIcon = '<i class="fas fa-film"></i>'
+			break
+	}
+}
+
+const countMoney = money => {
+	const newMoney = money.reduce((a, b) => a + b)
+	availableMoney.textContent = `${newMoney}€`
+}
+
+const deleteTransatcion = id => {
+	const transactionToDelete = document.getElementById(id)
+	const transactionAmount = parseFloat(
+		transactionToDelete.childNodes[3].innerText
+	)
+	const indexOfTransaction = moneyArr.indexOf(transactionAmount)
+
+	moneyArr.splice(indexOfTransaction, 1)
+
+	transactionToDelete.classList.contains("income")
+		? incomeSection.removeChild(transactionToDelete)
+		: expensesSection.removeChild(transactionToDelete)
+	countMoney(moneyArr)
 }
 
 addTransactionBtn.addEventListener("click", showPanel)
